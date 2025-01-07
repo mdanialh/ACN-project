@@ -1,7 +1,6 @@
 # Create a simulator instance
 set ns [new Simulator]
 
-
 # Color
 $ns color 0 Blue
 $ns color 1 Red
@@ -20,7 +19,7 @@ $ns trace-all $tracefile
 set namfile [open tcp_analysis.nam w]
 $ns namtrace-all $namfile
 #ns trace-queue-all $tracefile
-set winfile0 [open WinFile_Tahoe w]
+set winfile0 [open WinFile_Reno w]
 
 # Create nodes
 set n0 [$ns node]    ;# Source 1
@@ -60,7 +59,6 @@ $ns at 0.0 "$d2 label dest3"
 
 $ns queue-limit $rA $rB 10
 
-
 # Monitor the queue for the link between node A and node B
 $ns duplex-link-op $rA $rB queuePos 0.5
 
@@ -69,9 +67,8 @@ Agent/TCP set window_ 65000
 Agent/TCP set overhead_ 0
 
 # Create TCP agents and sinks for Flow 1
-set tcp0 [new Agent/TCP ]
-$tcp0 set class_ TCP/Tahoe 
-$tcp0 set fid_ 0       ;
+set tcp0 [new Agent/TCP/Reno]
+$tcp0 set fid_ 0       ;# TCP variant (change to Tahoe/NewReno as needed)
 $tcp0 set packetSize_ 960
 $ns attach-agent $n0 $tcp0
 
@@ -81,9 +78,8 @@ $ns attach-agent $d0 $sink0
 $ns connect $tcp0 $sink0
 
 # Create TCP agents and sinks for Flow 2
-set tcp1 [new Agent/TCP ]
-$tcp1 set class_ TCP/Tahoe 
-$tcp1 set fid_ 1        ;
+set tcp1 [new Agent/TCP/Reno]
+$tcp1 set fid_ 1        ;# TCP variant (change to Tahoe/NewReno as needed)
 $tcp1 set packetSize_ 960
 $ns attach-agent $n1 $tcp1
 
@@ -92,9 +88,8 @@ $ns attach-agent $d1 $sink1
 $ns connect $tcp1 $sink1
 
 # Create TCP agents and sinks for Flow 3
-set tcp2 [new Agent/TCP ]
-$tcp2 set class_ TCP/Tahoe 
-$tcp2 set fid_ 2        ;
+set tcp2 [new Agent/TCP/Reno]
+$tcp2 set fid_ 2        ;# TCP variant (change to Tahoe/NewReno as needed)
 $tcp2 set packetSize_ 960
 $ns attach-agent $n2 $tcp2
 
@@ -103,9 +98,8 @@ $ns attach-agent $d1 $sink2
 $ns connect $tcp2 $sink2
 
 # Create TCP agents and sinks for Flow 3
-set tcp3 [new Agent/TCP ]
-$tcp3 set class_ TCP/Tahoe 
-$tcp3 set fid_ 3      ;
+set tcp3 [new Agent/TCP/Reno]
+$tcp3 set fid_ 3      ;# TCP variant (change to Tahoe/NewReno as needed)
 $tcp3 set packetSize_ 960
 $ns attach-agent $n3 $tcp3
 
@@ -115,9 +109,8 @@ $ns attach-agent $d0 $sink3
 $ns connect $tcp3 $sink3
 
 # Create TCP agents and sinks for Flow 3
-set tcp4 [new Agent/TCP  ]
-$tcp4 set class_ TCP/Tahoe 
-$tcp4 set fid_ 4        ;
+set tcp4 [new Agent/TCP/Reno]
+$tcp4 set fid_ 4        ;# TCP variant (change to Tahoe/NewReno as needed)
 $tcp4 set packetSize_ 960
 $ns attach-agent $n4 $tcp4
 
@@ -201,9 +194,9 @@ proc finish {} {
     close $tracefile
     close $namfile
     exec nam tcp_analysis.nam 
-    exec xgraph WinFile_Tahoe -x_range 0 20  -pdf -title_x "Time (s)" -title_y "Window Size" -title "Tahoe Congestion Window"
+    exec xgraph WinFile_Reno -x_range 0 20  -pdf -title_x "Time (s)" -title_y "Window Size" -title "Reno Congestion Window"
     exec mv plot.pdf cwnd_graph.pdf
-    exec awk -f drop.awk tcp_analysis.tr > dropped.out 
+    exec awk -f drop.awk tcp_analysis.tr > dropped.out
     exec awk -f avgStats.awk src=0 dst=7 flow=0 pkt=1000 tcp_analysis.tr > avgTCP.out &
     exit 0
 }
@@ -226,3 +219,4 @@ $ns at 300 "finish"
 
 # Run the simulation
 $ns run
+
